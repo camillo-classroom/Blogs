@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "AAvUHwxbWKE=",
+  "success": true,
+  "projectFilePath": "D:\\Camillo\\PWA\\Blogs\\Blogs.Api\\Blogs.Api.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Aluno\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.0\\microsoft.aspnetcore.openapi.9.0.0.nupkg.sha512",
+    "C:\\Users\\Aluno\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}
