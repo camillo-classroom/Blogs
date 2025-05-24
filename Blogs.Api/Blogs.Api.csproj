@@ -7,10 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.66" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.5" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Blogs.Infra\Blogs.Infra.csproj" />
     <ProjectReference Include="..\Blogs.Model\Blogs.Model.csproj" />
   </ItemGroup>
 

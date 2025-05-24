@@ -1,0 +1,29 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "compounds": [
+    {
+        "name": "Run All",
+        "configurations": [
+            "Api Debug",
+            "Frontend Debug"
+        ]
+    }
+    ],
+    "configurations": [
+        {
+            "name": "Api Debug",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "/Blogs.Api/Blogs.Api.csproj"
+        },
+        {
+            "name": "Frontend Debug",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "/Blogs.Front/Blogs.Front.csproj"
+        }
+    ]
+}
