@@ -79,7 +79,7 @@ public abstract class BaseDAO<T> : IBaseDAO<T> where T : IModel
         return SelecionarUnico(sql, new { id });
     }
 
-    private void Executar(string sql, object obj)
+    protected void Executar(string sql, object obj)
     {
         using var conexao = new SqliteConnection("Data Source=db/app.db");
 
