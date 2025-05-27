@@ -21,25 +21,27 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+// var summaries = new[]
+// {
+//     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+// };
 
-app.MapPost("/login", Login
-);
+// app.MapPost("/login", Login
+// );
 
-void Login(Login login, IPasswordHasher<Usuario> hasher, IUsuarioDAO dao)
-{
-    //var sucesso = dao.Login(login, hasher);
+// void Login(Login login, IPasswordHasher<Usuario> hasher, IUsuarioDAO dao)
+// {
+//     //var sucesso = dao.Login(login, hasher);
 
-    //if (sucesso)
+//     //if (sucesso)
 
-}
+// }
+
+app.AdicionarTodosEndpoints();
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+// record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+// {
+//     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+// }
