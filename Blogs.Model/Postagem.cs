@@ -9,5 +9,5 @@ public class Postagem : BaseModel
     public string Conteudo { get; set; } = string.Empty;
     public DateTime DataHora { get; set; }
     public int Likes { get; set; }
-    public int Delikes { get; set; }
+    public int Deslikes { get; set; }
 }
