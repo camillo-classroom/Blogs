@@ -1,12 +1,14 @@
-using Blogs.Infra;
+using Blogs.Model;
 using Dapper;
 using Microsoft.Data.Sqlite;
+
+namespace Blogs.Infra;
 
 public abstract class BaseDAO<T> : IBaseDAO<T> where T : IModel
 {
     protected abstract string NomeTabela { get; }
 
-    public virtual void Inserir(T obj)
+    public virtual async Task InserirAsync(T obj)
     {
         string nomesCampos = "";
         string parametrosCampos = "";
@@ -25,10 +27,10 @@ public abstract class BaseDAO<T> : IBaseDAO<T> where T : IModel
             " values " +
             $" (@Id{parametrosCampos})";
         
-        Executar(sql, obj);
+        await ExecutarAsync(sql, obj);
     }
 
-    public virtual void Alterar(T obj)
+    public virtual async Task AlterarAsync(T obj)
     {
         var campos = "";
 
@@ -40,32 +42,32 @@ public abstract class BaseDAO<T> : IBaseDAO<T> where T : IModel
             " WHERE " +
             " id = @Id";
 
-        Executar(sql, obj);
+        await ExecutarAsync(sql, obj);
     }
 
-    public virtual void Excluir(long id)
+    public virtual async Task ExcluirAsync(long id)
     {
         string sql = $"DELETE {NomeTabela}" +
             " WHERE " +
             " id = @Id";
 
-        Executar(sql, new { Id = id });
+        await ExecutarAsync(sql, new { Id = id });
     }
 
-    public virtual IList<T> RetornarTodos()
+    public virtual async Task<IEnumerable<T>> RetornarComPaginacaoDescendenteAsync(long ultimoIdConsultado, int numeroRegsASeremRetornados)
     {
         var campos = "";
 
         foreach (var nomeProp in GetPropriedades(typeof(T)))
             campos += $", {nomeProp.ToLower()} as {nomeProp}";
 
-        string sql = $"SELECT id as Id{campos}" + 
-            $" FROM {NomeTabela}";
+        string sql = $"SELECT TOP {numeroRegsASeremRetornados} id as Id{campos}" + 
+            $" FROM {NomeTabela} WHERE id < @Id ORDER BY id DESC";
 
-        return Selecionar(sql);
+        return await SelecionarAsync(sql, new { Id = ultimoIdConsultado });
     }
 
-    public virtual T? RetornarPorId(long id)
+    public virtual async Task<T?> RetornarPorIdAsync(long id)
     {
         var campos = "";
 
@@ -76,48 +78,50 @@ public abstract class BaseDAO<T> : IBaseDAO<T> where T : IModel
             $" FROM {NomeTabela}" +
             " WHERE id = @id";
 
-        return SelecionarUnico(sql, new { id });
+        return await SelecionarUnicoAsync(sql, new { id });
     }
 
-    protected void Executar(string sql, object obj)
+    protected async Task ExecutarAsync(string sql, object obj)
     {
         using var conexao = new SqliteConnection("Data Source=db/app.db");
 
-        conexao.Open();
+        await conexao.OpenAsync();
 
-        conexao.Execute(sql, obj); 
+        await conexao.ExecuteAsync(sql, obj);
+        
+        await conexao.OpenAsync();
     }
 
-    protected IList<T> Selecionar(string sql, object? obj = null)
+    protected async Task<IEnumerable<T>> SelecionarAsync(string sql, object? obj = null)
     {
         using var conexao = new SqliteConnection("Data Source=db/app.db");
 
-        conexao.Open();
+        await conexao.OpenAsync();
 
         if (obj == null)
-            return conexao.Query<T>(sql).ToList();
+            return await conexao.QueryAsync<T>(sql);
 
-        return conexao.Query<T>(sql, obj).ToList();
+        return await conexao.QueryAsync<T>(sql, obj);
     }
 
-    protected T? SelecionarUnico(string sql, object? obj = null)
+    protected async Task<T?> SelecionarUnicoAsync(string sql, object? obj = null)
     {
         using var conexao = new SqliteConnection("Data Source=db/app.db");
 
-        conexao.Open();
+        await conexao.OpenAsync();
 
         if (obj == null)
-            return conexao.QuerySingle<T>(sql);
+            return await conexao.QuerySingleAsync<T>(sql);
 
-        return conexao.QuerySingle<T>(sql, obj);
+        return await conexao.QuerySingleAsync<T>(sql, obj);
     }
 
-    private IEnumerable<string> GetPropriedades(T obj)
+    protected IEnumerable<string> GetPropriedades(T obj)
     {
         return GetPropriedades(obj.GetType());
     }
 
-    private IEnumerable<string> GetPropriedades(Type tipo)
+    protected IEnumerable<string> GetPropriedades(Type tipo)
     {
         //LINQ - Language Integrated Query
         return tipo.GetProperties().Where(x => !x.Name.Equals("Id")).Select(x => x.Name);

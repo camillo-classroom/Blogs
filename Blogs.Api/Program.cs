@@ -1,5 +1,5 @@
-using Blogs.Infra;
-using Blogs.Model;
+using Blogs.Infra.ControlesAcessos;
+using Blogs.Model.ControleAcessos;
 using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);

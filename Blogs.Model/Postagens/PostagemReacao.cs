@@ -1,6 +1,4 @@
-using System;
-
-namespace Blogs.Model;
+namespace Blogs.Model.Postagens;
 
 public class PostagemReacao : BaseModel
 {

@@ -1,3 +1,5 @@
+namespace Blogs.Model.ControleAcessos;
+
 public class Login
 {
     public string Email { get; set; } = string.Empty;

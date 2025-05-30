@@ -1,6 +1,4 @@
-using System;
-
-namespace Blogs.Model;
+namespace Blogs.Model.ControleAcessos;
 
 public class Usuario : BaseModel
 {

@@ -4,9 +4,13 @@ namespace Blogs.Infra;
 
 public interface IBaseDAO<T> where T: IModel 
 {
-    public void Inserir(T obj);
-    public void Alterar(T obj);
-    public void Excluir(long id);
-    public IList<T> RetornarTodos();
-    public T? RetornarPorId(long id);
+    Task InserirAsync(T obj);
+
+    Task AlterarAsync(T obj);
+
+    Task ExcluirAsync(long id);
+
+    Task<IEnumerable<T>> RetornarComPaginacaoDescendenteAsync(long ultimoIdConsultado, int numeroRegsASeremRetornados = 100);
+
+    Task<T?> RetornarPorIdAsync(long id);
 }
