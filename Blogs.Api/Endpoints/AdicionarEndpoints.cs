@@ -1,3 +1,5 @@
+namespace Blogs.Api.Endpoints;
+
 public static class AdicionarEndpoints
 {
     /// <summary>

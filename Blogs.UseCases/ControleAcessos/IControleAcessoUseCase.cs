@@ -1,24 +1,26 @@
 ﻿using Blogs.DTO.ControleAcessos;
-using Blogs.Infra.ControlesAcessos;
-using Blogs.Mappers.ControleAcessos;
-using Blogs.Model.ControleAcessos;
-using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Blogs.UseCases.ControleAcessos;
 
 public interface IControleAcessoUseCase
 {
+    void IdentificarAcesso(long idUsuario);
+
     #region Todos_Usuarios
 
-    bool Logar(LoginDTO login, out IEnumerable<MensagemRetorno>? erros);
-    bool TrocarSenha(TrocarSenhaDTO trocarSenha, out IEnumerable<MensagemRetorno>? erros);
-    bool InserirUsuario(UsuarioDTO usuario, out IEnumerable<MensagemRetorno>? erros);
-    bool AlterarUsuario(UsuarioDTO usuario, out IEnumerable<MensagemRetorno>? erros);
+    Task<ResultadoUnico<UsuarioDTO>> LogarAsync(LoginDTO login);
+
+    Task<ResultadoVoid> TrocarSenhaAsync(TrocarSenhaDTO trocarSenha);
+
+    Task<ResultadoUnico<UsuarioDTO>> InserirUsuario(UsuarioDTO usuario);
+
+    #endregion
+
+    #region Apenas_Logados
+
+    Task<ResultadoVoid> AlterarUsuario(UsuarioDTO usuario);
+    Task<bool> SlugJaUtilizadoAsync(string slug, int v);
+    Task<ResultadoUnico<UsuarioDTO>> ObterUsuarioPorId(long id);
 
     #endregion
 }

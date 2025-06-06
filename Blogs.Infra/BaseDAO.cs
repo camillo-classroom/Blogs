@@ -1,6 +1,7 @@
 using Blogs.Model;
 using Dapper;
 using Microsoft.Data.Sqlite;
+using SnowflakeGenerator;
 
 namespace Blogs.Infra;
 
@@ -10,6 +11,9 @@ public abstract class BaseDAO<T> : IBaseDAO<T> where T : IModel
 
     public virtual async Task InserirAsync(T obj)
     {
+        if (obj.Id == 0)
+            obj.Id = GetNovoId();
+
         string nomesCampos = "";
         string parametrosCampos = "";
 
@@ -32,10 +36,14 @@ public abstract class BaseDAO<T> : IBaseDAO<T> where T : IModel
 
     public virtual async Task AlterarAsync(T obj)
     {
+        var virgula = "";
         var campos = "";
 
         foreach (var nomeProp in GetPropriedades(obj))
-            campos += $"{nomeProp.ToLower()} = @{nomeProp}";
+        {
+            campos += $"{virgula}{nomeProp.ToLower()} = @{nomeProp}";
+            virgula = ",";
+        }
 
         string sql = $"UPDATE {NomeTabela}" +
             $" SET {campos}" +
@@ -54,19 +62,6 @@ public abstract class BaseDAO<T> : IBaseDAO<T> where T : IModel
         await ExecutarAsync(sql, new { Id = id });
     }
 
-    public virtual async Task<IEnumerable<T>> RetornarComPaginacaoDescendenteAsync(long ultimoIdConsultado, int numeroRegsASeremRetornados)
-    {
-        var campos = "";
-
-        foreach (var nomeProp in GetPropriedades(typeof(T)))
-            campos += $", {nomeProp.ToLower()} as {nomeProp}";
-
-        string sql = $"SELECT TOP {numeroRegsASeremRetornados} id as Id{campos}" + 
-            $" FROM {NomeTabela} WHERE id < @Id ORDER BY id DESC";
-
-        return await SelecionarAsync(sql, new { Id = ultimoIdConsultado });
-    }
-
     public virtual async Task<T?> RetornarPorIdAsync(long id)
     {
         var campos = "";
@@ -83,18 +78,18 @@ public abstract class BaseDAO<T> : IBaseDAO<T> where T : IModel
 
     protected async Task ExecutarAsync(string sql, object obj)
     {
-        using var conexao = new SqliteConnection("Data Source=db/app.db");
+        using var conexao = new SqliteConnection(StringConexao);
 
         await conexao.OpenAsync();
 
         await conexao.ExecuteAsync(sql, obj);
         
-        await conexao.OpenAsync();
+        await conexao.CloseAsync();
     }
 
     protected async Task<IEnumerable<T>> SelecionarAsync(string sql, object? obj = null)
     {
-        using var conexao = new SqliteConnection("Data Source=db/app.db");
+        using var conexao = new SqliteConnection(StringConexao);
 
         await conexao.OpenAsync();
 
@@ -106,14 +101,34 @@ public abstract class BaseDAO<T> : IBaseDAO<T> where T : IModel
 
     protected async Task<T?> SelecionarUnicoAsync(string sql, object? obj = null)
     {
-        using var conexao = new SqliteConnection("Data Source=db/app.db");
+        T? result;
+        using var conexao = new SqliteConnection(StringConexao);
 
         await conexao.OpenAsync();
 
         if (obj == null)
-            return await conexao.QuerySingleAsync<T>(sql);
+            result = await conexao.QuerySingleOrDefaultAsync<T>(sql);
+        else
+            result = await conexao.QuerySingleOrDefaultAsync<T>(sql, obj);
 
-        return await conexao.QuerySingleAsync<T>(sql, obj);
+        await conexao.CloseAsync();
+        return result;
+    }
+
+    protected async Task<K?> SelecionarUnicoAsync<K>(string sql, object? obj = null)
+    {
+        K? result;
+        using var conexao = new SqliteConnection(StringConexao);
+
+        await conexao.OpenAsync();
+
+        if (obj == null)
+            result = await conexao.QuerySingleOrDefaultAsync<K>(sql);
+
+        result = await conexao.QuerySingleOrDefaultAsync<K>(sql, obj);
+
+        await conexao.CloseAsync();
+        return result;
     }
 
     protected IEnumerable<string> GetPropriedades(T obj)
@@ -126,4 +141,20 @@ public abstract class BaseDAO<T> : IBaseDAO<T> where T : IModel
         //LINQ - Language Integrated Query
         return tipo.GetProperties().Where(x => !x.Name.Equals("Id")).Select(x => x.Name);
     }
+
+    //https://www.nuget.org/packages/SnowflakeGenerator
+    public long GetNovoId()
+    {
+        return snowflake.NextID();
+    }
+
+    private static Settings settings = new Settings
+    {
+        MachineID = 1, //O ID da máquina deve ser alterado para ser único para cada servidor ou instância
+        CustomEpoch = new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero)
+    };
+
+    private static Snowflake snowflake = new(settings);
+
+    public static string StringConexao = $"Data Source={Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "_db", "dados.db")}";
 }

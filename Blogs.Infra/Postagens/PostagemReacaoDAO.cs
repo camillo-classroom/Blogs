@@ -15,9 +15,8 @@ public class PostagemReacaoDAO : BaseDAO<PostagemReacao>, IPostagemReacaoDAO
             return;
 
         var antesEraLike = obj.Reacao == PostagemReacao.EReacao.Like;
-        obj.Reacao = reacao;
-
-        using (var conexao = new SqliteConnection("Data Source=db/app.db"))
+        
+        using (var conexao = new SqliteConnection(StringConexao))
         {
             try
             {
@@ -32,10 +31,18 @@ public class PostagemReacaoDAO : BaseDAO<PostagemReacao>, IPostagemReacaoDAO
                         else
                             await conexao.ExecuteAsync("UPDATE postagem SET deslikes = deslikes - 1, likes = likes + 1 WHERE id_postagem = @IdPostagem", obj);
 
-                        //obj.Id = ... precisa adicionar o id
+                        var novaReacao = new PostagemReacao
+                        {
+                            Id = GetNovoId(),
+                            IdPostagem = obj.IdPostagem,
+                            IdUsuario = obj.IdUsuario,
+                            Reacao = reacao,
+                            DataHora = DateTime.Now
+                        };
+                        
                         var sql = $"INSERT INTO {NomeTabela} (id_postagem, id_usuario, reacao, data_hora) VALUES (@IdPostagem, @IdUsuario, @Reacao, @DataHora)";
 
-                        await conexao.ExecuteAsync(sql, obj);
+                        await conexao.ExecuteAsync(sql, novaReacao);
 
                         await tran.CommitAsync();
                     }
@@ -54,7 +61,7 @@ public class PostagemReacaoDAO : BaseDAO<PostagemReacao>, IPostagemReacaoDAO
 
     public async Task ReagirAsync(PostagemReacao obj)
     {
-        using (var conexao = new SqliteConnection("Data Source=db/app.db"))
+        using (var conexao = new SqliteConnection(StringConexao)  )
         {
             try
             {
@@ -97,7 +104,9 @@ public class PostagemReacaoDAO : BaseDAO<PostagemReacao>, IPostagemReacaoDAO
             campos += $", {nomeProp.ToLower()} as {nomeProp}";
 
         string sql = $"SELECT id as Id{campos}" +
-            $" FROM {NomeTabela} WHERE id_usuario = IdUsuarioLogado AND id_postagem = @IdPostagem";
+            $" FROM {NomeTabela}" + 
+            " WHERE id_usuario = @IdUsuarioLogado AND id_postagem = @IdPostagem" +
+            " ORDER BY id DESC";
 
         return await SelecionarUnicoAsync(sql, new { IdUsuarioLogado = idUsuarioLogado, IdPostagem = idPostagem });
     }

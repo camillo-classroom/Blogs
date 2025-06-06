@@ -5,7 +5,7 @@ namespace Blogs.UseCases.Postagens;
 
 public class PostagemReacaoUseCase
 (
-    PostagemDAO postagemDAO,
+    IPostagemDAO postagemDAO,
     IPostagemReacaoDAO postagemReacaoDAO
 ) : BaseUseCase, IPostagemReacaoUseCase
 {
@@ -37,7 +37,7 @@ public class PostagemReacaoUseCase
         {
             if (objReacao.Reacao == PostagemReacao.EReacao.Like)
                 return Falha([new("Você já reagiu anteiormente à esta postagem.")]);
-            
+
             objReacao.DataHora = DateTime.Now;            
             await postagemReacaoDAO.AlterarReacaoAsync(objReacao, PostagemReacao.EReacao.Like);
         }

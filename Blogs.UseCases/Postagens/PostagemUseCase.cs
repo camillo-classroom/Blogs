@@ -13,16 +13,16 @@ public class PostagemUseCase
 {
     #region Todos_usuarios
 
-    public async Task<ResultadoLista<PostagemDTO>> ConsultarPostagensAsync(long ultimoIdConsultado)
+    public async Task<ResultadoLista<PostagemDTO>> ConsultarPostagensAsync(long idAutor, long ultimoIdPostagemConsultado)
     {
         try
         {
-            var obj = await postagemDAO.RetornarComPaginacaoDescendenteAsync(ultimoIdConsultado);
+            var obj = await postagemDAO.RetornarComPaginacaoDescendenteAsync(idAutor, ultimoIdPostagemConsultado);
 
             if (obj == null)
                 return FalhaLista<PostagemDTO>([new("Nenhuma postagem existe no sistema.")]);
 
-            var objetos = await postagemDAO.RetornarComPaginacaoDescendenteAsync(ultimoIdConsultado);
+            var objetos = await postagemDAO.RetornarComPaginacaoDescendenteAsync(idAutor, ultimoIdPostagemConsultado);
             return SucessoLista(objetos.Select(x => postagemMapper.GetDto(x)));
         }
         catch
@@ -61,14 +61,14 @@ public class PostagemUseCase
         }
     }
 
-    public async Task<ResultadoVoid> ExcluirPostagem(PostagemDTO postagem)
+    public async Task<ResultadoVoid> ExcluirPostagem(long id)
     {
         if (idUsuarioLogado == 0)
             return Falha([new("Acesso não permitido.")]);
 
         try
         {
-            var obj = await postagemDAO.RetornarPorIdAsync(postagem.Id);
+            var obj = await postagemDAO.RetornarPorIdAsync(id);
 
             if (obj == null)
                 return Falha([new("A postagem que você deseja excluir não foi encontrada no sistema.")]);
@@ -85,24 +85,23 @@ public class PostagemUseCase
         }
     }
 
-    public async Task<ResultadoVoid> InserirPostagem(PostagemDTO postagem)
+    public async Task<ResultadoUnico<PostagemDTO>> InserirPostagem(PostagemDTO postagem)
     {
         if (idUsuarioLogado == 0)
-            return new(Sucesso: false, Erros: [new("Acesso não permitido.")]);
+            return FalhaObjeto<PostagemDTO>([new("Acesso não permitido.")]);
 
         try
         {
             var obj = new Postagem();
-            //obj.Id = ... precisa preencher o id
             obj.IdAutor = idUsuarioLogado;
             
             postagemMapper.PreencherModel(obj, postagem);
             await postagemDAO.InserirAsync(obj);
-            return new(Sucesso: true, Erros: null);
+            return SucessoObjeto(postagemMapper.GetDto(obj));
         }
         catch
         {
-            return new(Sucesso: false, Erros: [new("Erro na tentativa de alterar postagem.", MensagemRetorno.EOrigem.Erro)]);
+            return FalhaObjeto<PostagemDTO>([new("Erro na tentativa de alterar postagem.", MensagemRetorno.EOrigem.Erro)]);
         }
     }
 

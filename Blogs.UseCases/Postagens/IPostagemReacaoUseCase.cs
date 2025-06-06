@@ -11,6 +11,7 @@ namespace Blogs.UseCases.Postagens
 {
     public interface IPostagemReacaoUseCase
     {
+        void IdentificarAcesso(long idUsuario);
         Task<ResultadoVoid> Like(long postagemId);
         Task<ResultadoVoid> Deslike(long postagemId);
     }
