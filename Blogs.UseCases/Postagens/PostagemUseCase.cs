@@ -13,16 +13,15 @@ public class PostagemUseCase
 {
     #region Todos_usuarios
 
-    public async Task<ResultadoLista<PostagemDTO>> ConsultarPostagensAsync(long idAutor, long ultimoIdPostagemConsultado)
+    public async Task<ResultadoLista<PostagemDTO>> ConsultarPostagensAsync(long idAutor, long? ultimoIdPostagemConsultado)
     {
         try
         {
-            var obj = await postagemDAO.RetornarComPaginacaoDescendenteAsync(idAutor, ultimoIdPostagemConsultado);
+            var objetos = await postagemDAO.RetornarComPaginacaoDescendenteAsync(idAutor, ultimoIdPostagemConsultado);
 
-            if (obj == null)
+            if (objetos == null)
                 return FalhaLista<PostagemDTO>([new("Nenhuma postagem existe no sistema.")]);
 
-            var objetos = await postagemDAO.RetornarComPaginacaoDescendenteAsync(idAutor, ultimoIdPostagemConsultado);
             return SucessoLista(objetos.Select(x => postagemMapper.GetDto(x)));
         }
         catch
