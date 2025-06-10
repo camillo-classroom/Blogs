@@ -9,5 +9,6 @@ public static class AdicionarEndpoints
     public static void AdicionarTodosEndpoints(this WebApplication app)
     {
         app.AdicionarEndpointsUsuarios();
+        app.AdicionarEndpointsPostagens();
     }
 }

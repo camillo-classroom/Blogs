@@ -13,41 +13,67 @@ namespace Blogs.Api.Endpoints
         /// <param name="app">Instância do WebApplication.</param>
         public static void AdicionarEndpointsPostagens(this WebApplication app)
         {
-            var usuarios = app.MapGroup("/postagens")
+            var postagens = app.MapGroup("/postagens")
                 .WithTags("Postagens")
                 .WithDescription("Endpoints relacionados a postagens");
 
-            usuarios.MapGet("/{idAutor}/{:idUltimaPostagem}", InserirPostagem)
+            postagens.MapGet("/{idAutor}/{idUltimaPostagem?}", RetornarPostagens)
+                .WithName("Retornar postagens")
+                .WithSummary("Retorna postagens com id anteriores ao da última postagem, quando este id é informado");
+
+            postagens.MapPost("/", InserirPostagem)
                 .WithName("Inserir postagem")
                 .WithSummary("Insere uma nova postagem no sistema")
                 .RequireAuthorization();
 
-            usuarios.MapPost("/", InserirPostagem)
-                .WithName("Inserir postagem")
-                .WithSummary("Insere uma nova postagem no sistema")
-                .RequireAuthorization();
-
-            usuarios.MapPut("/{id}", AlterarPostagem)
+            postagens.MapPut("/{id}", AlterarPostagem)
                 .WithName("Alterar postagem")
                 .WithSummary("Altera uma postagem no sistema")
                 .RequireAuthorization();
 
-            usuarios.MapDelete("/{id}", ExcluirPostagem)
+            postagens.MapDelete("/{id}", ExcluirPostagem)
                 .WithName("Excluir postagem")
                 .WithSummary("Exclui uma postagem no sistema")
                 .RequireAuthorization();
+
+            postagens.AdicionarEndpointsPostagensReacoes();
+        }
+
+        private static async Task<IResult> RetornarPostagens(long idAutor, long? idUltimaPostagem, IPostagemUseCase postagemUseCase)
+        {
+            try
+            {
+                var resultado = await postagemUseCase.ConsultarPostagensAsync(idAutor, idUltimaPostagem);
+
+                return resultado.Sucesso
+                    ? TypedResults.Ok(resultado.Objetos)
+                    : TypedResults.BadRequest(resultado.Erros);
+            }
+            catch (Exception ex)
+            {
+#if DEBUG
+                var metodo = MethodBase.GetCurrentMethod();
+
+                if (metodo != null)
+                    Debug.WriteLine($"Exception in {metodo.Name}: {ex.Message}");
+#endif
+
+                return TypedResults.InternalServerError();
+            }
         }
 
         private static async Task<IResult> InserirPostagem(PostagemDTO obj, HttpContext context, IPostagemUseCase postagemUseCase)
         {
             try
             {
+                obj.DataHora = DateTime.Now;
+
                 postagemUseCase.IdentificarAcesso(context.User.GetId());
 
                 var resultado = await postagemUseCase.InserirPostagem(obj);
 
                 return resultado.Sucesso
-                    ? TypedResults.Created($"/{resultado.Objeto?.Id}", resultado.Objeto)
+                    ? TypedResults.Created($"/{resultado.Objeto.Id}", resultado.Objeto)
                     : TypedResults.BadRequest(resultado.Erros);
             }
             catch (Exception ex)

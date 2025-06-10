@@ -51,7 +51,7 @@ public static class AdicionarEnpointsUsuariosExtensions
 
             var resultado = await controleAcessoUseCase.InserirUsuario(usuario);
             return resultado.Sucesso
-                ? TypedResults.Created($"/{resultado.Objeto?.Id}", resultado.Objeto)
+                ? TypedResults.Created($"/{resultado.Objeto.Id}", resultado.Objeto)
                 : TypedResults.BadRequest(resultado.Erros);
         }
         catch (Exception ex)
@@ -127,7 +127,7 @@ public static class AdicionarEnpointsUsuariosExtensions
         {
             var resultado = await controleAcessoUseCase.LogarAsync(login);
 
-            if (!resultado.Sucesso || resultado.Objeto == null)
+            if (!resultado.Sucesso)
                 return TypedResults.Unauthorized();
 
             return TypedResults.Ok(new TokenService().Gerar(resultado.Objeto));
