@@ -1,6 +1,6 @@
 ﻿namespace Blogs.DTO.Postagens;
 
-public record PostagemDTO
+public record struct PostagemDTO
 (
     long Id,
     string Titulo,
