@@ -2,6 +2,7 @@ using Blogs.Model;
 using Dapper;
 using Microsoft.Data.Sqlite;
 using SnowflakeGenerator;
+using System.Reflection;
 
 namespace Blogs.Infra;
 
@@ -139,7 +140,7 @@ public abstract class BaseDAO<T> : IBaseDAO<T> where T : IModel
     protected IEnumerable<string> GetPropriedades(Type tipo)
     {
         //LINQ - Language Integrated Query
-        return tipo.GetProperties().Where(x => !x.Name.Equals("Id")).Select(x => x.Name);
+        return tipo.GetProperties().Where(x => !x.Name.Equals("Id") && x.GetCustomAttribute(typeof(IgnoreEsteCampoAttribute)) == null).Select(x => x.Name);
     }
 
     //https://www.nuget.org/packages/SnowflakeGenerator
