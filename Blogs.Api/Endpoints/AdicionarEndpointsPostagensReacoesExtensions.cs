@@ -11,14 +11,14 @@ namespace Blogs.Api.Endpoints
         /// Método para adicionar os endpoints de usuários da API.
         /// </summary>
         /// <param name="app">Instância do WebApplication.</param>
-        public static void AdicionarEndpointsPostagensReacoes(this RouteGroupBuilder app)
+        public static void AdicionarEndpointsPostagensReacoes(this RouteGroupBuilder group)
         {
-            app.MapPost("/{idPostagem}/like", Like)
+            group.MapPost("/{idPostagem}/like", Like)
                 .WithName("Like em postagem")
                 .WithSummary("Dá like na postagem para o usuário logado")
                 .RequireAuthorization();
 
-            app.MapPost("/{idPostagem}/deslike", Deslike)
+            group.MapPost("/{idPostagem}/deslike", Deslike)
                 .WithName("Deslike em postagem")
                 .WithSummary("Dá deslike na postagem para o usuário logado")
                 .RequireAuthorization();

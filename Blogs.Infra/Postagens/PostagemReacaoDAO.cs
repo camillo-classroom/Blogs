@@ -26,9 +26,9 @@ public class PostagemReacaoDAO : BaseDAO<PostagemReacao>, IPostagemReacaoDAO
                     try
                     {
                         if (antesEraLike)
-                            await conexao.ExecuteAsync("UPDATE postagem SET likes = likes - 1, deslikes = deslikes + 1 WHERE id = @IdPostagem", obj);
+                            await conexao.ExecuteAsync("UPDATE postagem SET likes = likes - 1, deslikes = deslikes + 1 WHERE id = @IdPostagem", obj, tran);
                         else
-                            await conexao.ExecuteAsync("UPDATE postagem SET deslikes = deslikes - 1, likes = likes + 1 WHERE id = @IdPostagem", obj);
+                            await conexao.ExecuteAsync("UPDATE postagem SET deslikes = deslikes - 1, likes = likes + 1 WHERE id = @IdPostagem", obj, tran);
 
                         var novaReacao = new PostagemReacao
                         {
@@ -41,7 +41,7 @@ public class PostagemReacaoDAO : BaseDAO<PostagemReacao>, IPostagemReacaoDAO
                         
                         var sql = $"INSERT INTO {NomeTabela} (idpostagem, idusuario, reacao, datahora) VALUES (@IdPostagem, @IdUsuario, @Reacao, @DataHora)";
 
-                        await conexao.ExecuteAsync(sql, novaReacao);
+                        await conexao.ExecuteAsync(sql, novaReacao, tran);
 
                         await tran.CommitAsync();
                     }
@@ -72,14 +72,14 @@ public class PostagemReacaoDAO : BaseDAO<PostagemReacao>, IPostagemReacaoDAO
                     try
                     {
                         if (obj.Reacao == EReacao.Like)
-                            await conexao.ExecuteAsync("UPDATE postagem SET likes = likes + 1 WHERE id = @IdPostagem", obj);
+                            await conexao.ExecuteAsync("UPDATE postagem SET likes = likes + 1 WHERE id = @IdPostagem", obj, tran);
                         else
-                            await conexao.ExecuteAsync("UPDATE postagem SET deslikes = deslikes + 1 WHERE id = @IdPostagem", obj);
+                            await conexao.ExecuteAsync("UPDATE postagem SET deslikes = deslikes + 1 WHERE id = @IdPostagem", obj, tran);
 
                         obj.Id = GetNovoId();
                         var sql = $"INSERT INTO {NomeTabela} (idpostagem, idusuario, reacao, datahora) VALUES (@IdPostagem, @IdUsuario, @Reacao, @DataHora)";
 
-                        await conexao.ExecuteAsync(sql, obj);
+                        await conexao.ExecuteAsync(sql, obj, tran);
 
                         await tran.CommitAsync();
                     }

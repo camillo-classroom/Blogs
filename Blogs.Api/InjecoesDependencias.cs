@@ -18,9 +18,10 @@ namespace Blogs.Api
     {
         internal static void InjetarDependencias(this IServiceCollection services)
         {
+            services.AddScoped<IPasswordHasher<Usuario>, PasswordHasher<Usuario>>();
+            
             #region DAOs
             
-            services.AddScoped<IPasswordHasher<Usuario>, PasswordHasher<Usuario>>();
             services.AddScoped<IUsuarioDAO, UsuarioDAO>();
             services.AddScoped<IPostagemDAO, PostagemDAO>();
             services.AddScoped<IPostagemReacaoDAO, PostagemReacaoDAO>();
