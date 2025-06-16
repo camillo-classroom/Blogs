@@ -1,0 +1,24 @@
+﻿@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+@ChildContent
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    public string? Token { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var currentRoute = Navigation.ToBaseRelativePath(Navigation.Uri);
+
+        Token = await JS.InvokeAsync<string>("localStorage.getItem", "token");
+
+        if (string.IsNullOrEmpty(Token))
+        {
+            Navigation.NavigateTo("/autenticacao/login?RedirecionarCasoSucesso=" + currentRoute, true);
+            return;
+        }
+    }
+}

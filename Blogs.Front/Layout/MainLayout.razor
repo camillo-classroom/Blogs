@@ -1,4 +1,8 @@
-﻿@inherits LayoutComponentBase
+﻿@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+@inherits LayoutComponentBase
+
 <div class="page">
     <div class="sidebar">
         <NavMenu />
@@ -6,7 +10,16 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            @if(usuarioLogado)
+            {
+                <button class="btn btn-primary" @onclick="Logout">
+                    Logout
+                </button>
+            }
+            else
+            {
+                <NavLink class="btn btn-primary" href="/autenticacao/login?redirecionarcasosucesso=/">Login</NavLink>
+            }
         </div>
 
         <article class="content px-4">
@@ -14,3 +27,22 @@
         </article>
     </main>
 </div>
+
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await JS.InvokeAsync<string>("localStorage.getItem", "token");
+        usuarioLogado = !string.IsNullOrWhiteSpace(token);
+    }
+
+    private void Logout(MouseEventArgs args)
+    {
+        usuarioLogado = false;
+        JS.InvokeVoidAsync("localStorage.removeItem", "token");
+        Navigation.NavigateTo("/");
+        this.StateHasChanged();
+    }
+
+    private bool usuarioLogado = false;
+}

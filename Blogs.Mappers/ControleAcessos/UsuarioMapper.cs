@@ -10,8 +10,8 @@ public class UsuarioMapper : IMapper<Usuario, UsuarioDTO>
         return new UsuarioDTO
         (
             model.Id,
-            model.Email,
             model.Nome,
+            model.Email,
             model.Slug
         );
     }
