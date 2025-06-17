@@ -19,6 +19,10 @@ public static class AdicionarEnpointsUsuariosExtensions
             .WithTags("Usuários")
             .WithDescription("Endpoints relacionados a usuários");
 
+        usuarios.MapGet("/", RetornarPrincipaisAutores)
+            .WithName("Retornar Principais Autores")
+            .WithSummary("Retorna os principais autores");
+
         usuarios.MapPost("/", InserirUsuario)
             .WithName("Inserir usuário")
             .WithSummary("Insere um novo usuário na base de dados");
@@ -66,7 +70,30 @@ public static class AdicionarEnpointsUsuariosExtensions
             return TypedResults.InternalServerError();
         }
     }
+
     
+    private static async Task<IResult> RetornarPrincipaisAutores(HttpContext context, IControleAcessoUseCase controleAcessoUseCase)
+    {
+        try
+        {
+            var resultado = await controleAcessoUseCase.ObterPrincipaisAutores();
+            return resultado.Sucesso
+                ? TypedResults.Ok(resultado.Objetos)
+                : TypedResults.BadRequest(resultado.Erros);
+        }
+        catch (Exception ex)
+        {
+#if DEBUG
+            var metodo = MethodBase.GetCurrentMethod();
+
+            if (metodo != null)
+                Debug.WriteLine($"Exception in {metodo.Name}: {ex.Message}");
+#endif
+
+            return TypedResults.InternalServerError();
+        }
+    }
+
     private static async Task<IResult> ObterUsuarioPorId(long id, HttpContext context, IControleAcessoUseCase controleAcessoUseCase)
     {
         try

@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
 using Blogs.DTO.Postagens;
+using Blogs.Infra.ControlesAcessos;
+using Blogs.UseCases.ControleAcessos;
 using Blogs.UseCases.Postagens;
 
 namespace Blogs.Api.Endpoints
@@ -47,7 +49,7 @@ namespace Blogs.Api.Endpoints
 
                 return resultado.Sucesso
                     ? TypedResults.Ok(resultado.Objetos)
-                    : TypedResults.BadRequest(resultado.Erros);
+                    : TypedResults.BadRequest( resultado.Erros);
             }
             catch (Exception ex)
             {

@@ -15,6 +15,37 @@ public class ControleAcessoUseCase
 {
     #region Todos_Usuarios
 
+    public async Task<ResultadoLista<UsuarioDTO>> ObterPrincipaisAutores()
+    {
+        try
+        {
+            var objetos = await usuarioDAO.RetornarPrincipaisAutoresAsync();
+
+            return SucessoLista(objetos.Select(usuarioMapper.GetDto));
+        }
+        catch
+        {
+            return FalhaLista<UsuarioDTO>([new("Erro na tentativa de retornar os principais autores.", MensagemRetorno.EOrigem.Erro)]);
+        }
+    }
+
+    public async Task<ResultadoUnico<UsuarioDTO>> ObterUsuarioPorSlug(string slug)
+    {
+        try
+        {
+            var obj = await usuarioDAO.RetornarPorSlugAsync(slug);
+
+            if (obj == null)
+                return FalhaObjeto<UsuarioDTO>([new("O usuário que você deseja não foi encontrado no sistema.")]);
+
+            return SucessoObjeto(usuarioMapper.GetDto(obj));
+        }
+        catch
+        {
+            return FalhaObjeto<UsuarioDTO>([new("Erro na tentativa de obter usuário por slug.", MensagemRetorno.EOrigem.Erro)]);
+        }
+    }
+
     public async Task<ResultadoUnico<UsuarioDTO>> LogarAsync(LoginDTO login)
     {
         try
@@ -133,7 +164,7 @@ public class ControleAcessoUseCase
         }
         catch
         {
-            return FalhaObjeto<UsuarioDTO>([new("Erro na tentativa de alterar novo usuário.", MensagemRetorno.EOrigem.Erro)]);
+            return FalhaObjeto<UsuarioDTO>([new("Erro na tentativa de obter usuário por id.", MensagemRetorno.EOrigem.Erro)]);
         }
     }
 

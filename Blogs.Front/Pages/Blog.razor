@@ -1,0 +1,10 @@
+﻿@page "/{slug?}"
+
+<h3>Blog @Slug</h3>
+
+@code {
+
+
+    [Parameter]
+    public string? Slug { get; set; }
+}

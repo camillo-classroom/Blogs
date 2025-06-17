@@ -21,6 +21,8 @@ public interface IControleAcessoUseCase
     Task<ResultadoVoid> AlterarUsuario(UsuarioDTO usuario);
     Task<bool> SlugJaUtilizadoAsync(string slug, int v);
     Task<ResultadoUnico<UsuarioDTO>> ObterUsuarioPorId(long id);
+    Task<ResultadoUnico<UsuarioDTO>> ObterUsuarioPorSlug(string slug);
+    Task<ResultadoLista<UsuarioDTO>> ObterPrincipaisAutores();
 
     #endregion
 }

@@ -1,4 +1,5 @@
 ﻿using Blogs.DTO.Postagens;
+using Blogs.Infra.ControlesAcessos;
 using Blogs.Infra.Postagens;
 using Blogs.Mappers;
 using Blogs.Model.Postagens;
@@ -8,6 +9,7 @@ namespace Blogs.UseCases.Postagens;
 public class PostagemUseCase
 (
     IPostagemDAO postagemDAO,
+    IUsuarioDAO usuarioDAO,
     IMapper<Postagem, PostagemDTO> postagemMapper
 ): BaseUseCase, IPostagemUseCase
 {
