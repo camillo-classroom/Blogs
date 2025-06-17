@@ -1,7 +1,9 @@
 ﻿@inject IJSRuntime JS
 @inject NavigationManager Navigation
 
-@ChildContent
+<CascadingValue Value="Token">
+    @ChildContent
+</CascadingValue>
 
 @code {
     [Parameter]

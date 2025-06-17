@@ -8,7 +8,7 @@ public class UsuarioDAO : BaseDAO<Usuario>, IUsuarioDAO
 
     public async Task<Usuario?> RetornarPorSlugAsync(string slug)
     {
-        var sql = "SELECT id FROM usuario WHERE slug=@Slug";
+        var sql = "SELECT * FROM usuario WHERE slug=@Slug";
 
         return await SelecionarUnicoAsync(sql, new { Slug = slug });
     }

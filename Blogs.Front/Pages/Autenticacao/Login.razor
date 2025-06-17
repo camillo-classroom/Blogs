@@ -1,6 +1,7 @@
 ﻿@page "/autenticacao/login"
 @using Blogs.DTO.ControleAcessos
 @using Blogs.Front.Helpers
+@using System.Text.Json
 
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
@@ -8,22 +9,22 @@
 <h3>Login</h3>
 
 
-    <div class="form-group">
-        <label for="email">Email:</label>
-        <input type="email" class="form-control" id="email" @bind="Email" />
+<div class="form-group">
+    <label for="email">Email:</label>
+    <input type="email" class="form-control" id="email" @bind="Email" />
+</div>
+<div class="form-group">
+    <label for="Senha">Senha:</label>
+    <input type="password" class="form-control" id="Senha" @bind="Senha" />
+</div>
+@if (!string.IsNullOrEmpty(Mensagem))
+{
+    <div class="alert alert-danger mt-2">
+        @Mensagem
     </div>
-    <div class="form-group">
-        <label for="Senha">Senha:</label>
-        <input type="password" class="form-control" id="Senha" @bind="Senha" />
-    </div>
-    @if (!string.IsNullOrEmpty(Mensagem))
-    {
-        <div class="alert alert-danger mt-2">
-            @Mensagem
-        </div>
-    }
+}
 
-    <button class="btn btn-primary mt-2" @onclick="EfetuarLogin">Entrar</button>
+<button class="btn btn-primary mt-2" @onclick="EfetuarLogin">Entrar</button>
 
 
 
@@ -93,6 +94,10 @@
 
         if (string.IsNullOrEmpty(token))
             throw new Exception("Não foi possível efetuar o login.");
+
+        var usuario = await ApiBackend.GetAsync<UsuarioDTO>($"usuarios/email/{Email}");
+
+        await JS.InvokeVoidAsync("localStorage.setItem", "user", JsonSerializer.Serialize(usuario));
         
         await JS.InvokeVoidAsync("localStorage.setItem", "token", token);
     }

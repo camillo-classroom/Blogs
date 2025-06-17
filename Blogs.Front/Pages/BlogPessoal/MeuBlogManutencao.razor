@@ -1,7 +1,18 @@
-﻿@page "/{slug?}"
+﻿@using Blogs.Front.Pages.Autenticacao
 @using Blogs.DTO.ControleAcessos
 @using Blogs.DTO.Postagens
 @using Blogs.Front.Helpers
+@using System.Text.Json
+@inject IJSRuntime JS
+
+@if (inserindo)
+{
+    <CascadingValue Value="Token">
+        <MeuBlogNovaPostagem />
+    </CascadingValue>
+
+    return;
+}
 
 @if (usuario == null)
 {
@@ -12,6 +23,8 @@ else
     <h3>Blog do(a) @(usuario?.Nome)</h3>
 
     <p>@usuario?.Apresentacao</p>
+
+    <button class="btn btn-primary mb-2" @onclick="() => inserindo = true">Inserir Nova Postagem</button>
 
     @if (postagens == null)
     {
@@ -27,6 +40,7 @@ else
             @foreach (var postagem in postagens)
             {
                 <div>
+                    <button class="mb-1 btn btn-danger" @onclick="() => Excluir(postagem.Id)">Excluir Postagem</button>
                     <h4>@postagem.Titulo</h4>
                     <strong>@postagem.DataHora.ToString("dd/MM/yyyy HH:mm:ss")</strong>
                     <div>
@@ -39,16 +53,30 @@ else
         </div>
     }
 }
-@code {
-    [Parameter]
-    public string? Slug { get; set; }
 
+@code {
+    [CascadingParameter]
+    protected internal string? Token { get; set; }
+
+    private bool inserindo = false;
     private UsuarioDTO? usuario;
     private IEnumerable<PostagemDTO>? postagens;
 
     protected override async Task OnInitializedAsync()
     {
-        usuario = await ApiBackend.GetAsync<UsuarioDTO>($"usuarios/slug/{Slug}");
+        var usuarioStr = await JS.InvokeAsync<string>("localStorage.getItem", "user");
+
+        usuario = JsonSerializer.Deserialize<UsuarioDTO>(usuarioStr,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+        );
+
         postagens = await ApiBackend.GetAsync<IEnumerable<PostagemDTO>>($"postagens/{usuario?.Id}");
+    }
+
+    private async Task Excluir(long postagemId)
+    {
+        await ApiBackend.DeleteAsync($"postagens/{postagemId}", Token);
+        postagens = postagens?.Where(p => p.Id != postagemId);
+        StateHasChanged();
     }
 }

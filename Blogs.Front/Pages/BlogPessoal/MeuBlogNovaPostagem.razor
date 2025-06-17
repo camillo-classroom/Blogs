@@ -1,0 +1,35 @@
+﻿@using Blogs.DTO.Postagens
+@using Blogs.Front.Helpers
+
+@inject NavigationManager Navigation
+
+<h2>Inserir nova postagem</h2>
+
+<div class="form-group">
+    <label for="titulo">Título:</label>
+    <input type="text" class="form-control" id="titulo" @bind="postagem.Titulo" />
+</div>
+<div class="form-group">
+    <label for="conteudo">Conteúdo:</label>
+    <textarea class="form-control" id="conteudo" @bind="postagem.Conteudo" />
+</div>
+
+<button class="btn btn-primary mt-2" @onclick="Postar">Postar</button>
+
+@code {
+    [CascadingParameter]
+    protected internal string? Token { get; set; }
+
+    private PostagemDTO postagem = new();
+
+    private async Task Postar()
+    {
+        postagem.Conteudo = postagem.Conteudo.Replace("\n", "<br />");
+
+        var result = await ApiBackend.PostAsync<PostagemDTO>($"postagens", postagem, Token);
+
+        postagem = new();
+
+        Navigation.Refresh();
+    }
+}

@@ -29,6 +29,24 @@ public class ControleAcessoUseCase
         }
     }
 
+    public async Task<ResultadoUnico<UsuarioDTO>> ObterUsuarioPorEmail(string email)
+    {
+        try
+        {
+            var obj = await usuarioDAO.RetornarPorEmailAsync(email);
+
+            if (obj == null)
+                return FalhaObjeto<UsuarioDTO>([new("O usuário que você deseja não foi encontrado no sistema.")]);
+
+            return SucessoObjeto(usuarioMapper.GetDto(obj));
+        }
+        catch
+        {
+            return FalhaObjeto<UsuarioDTO>([new("Erro na tentativa de obter usuário por e-mail.", MensagemRetorno.EOrigem.Erro)]);
+        }
+    }
+
+
     public async Task<ResultadoUnico<UsuarioDTO>> ObterUsuarioPorSlug(string slug)
     {
         try

@@ -12,7 +12,8 @@ public class UsuarioMapper : IMapper<Usuario, UsuarioDTO>
             model.Id,
             model.Nome,
             model.Email,
-            model.Slug
+            model.Slug,
+            model.Apresentacao
         );
     }
 
@@ -22,5 +23,6 @@ public class UsuarioMapper : IMapper<Usuario, UsuarioDTO>
         model.Email = dto.Email;
         model.Nome = dto.Nome;
         model.Slug = dto.Slug;
+        model.Apresentacao = dto.Apresentacao;
     }
 }

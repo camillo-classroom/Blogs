@@ -1,0 +1,109 @@
+﻿@page "/novo-usuario"
+@using Blogs.DTO.ControleAcessos
+@using Blogs.Front.Helpers
+@using System.Text.Json
+
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+<h3>Inserir Novo Usuário</h3>
+
+
+<div class="form-group">
+    <label for="email">Nome:</label>
+    <input type="text" class="form-control" id="email" @bind="usuario.Nome" />
+</div>
+<div class="form-group">
+    <label for="email">Email:</label>
+    <input type="email" class="form-control" id="email" @bind="usuario.Email" />
+</div>
+<div class="form-group">
+    <label for="email">Slug:</label>
+    <input type="text" class="form-control" id="email" @bind="usuario.Slug" />
+</div>
+<div class="form-group">
+    <label for="Senha">Senha:</label>
+    <input type="password" class="form-control" id="Senha" @bind="Senha" />
+</div>
+<div class="form-group">
+    <label for="email">Apresentação:</label>
+    <textarea class="form-control" id="email" @bind="usuario.Apresentacao" />
+</div>
+@if (!string.IsNullOrEmpty(mensagem))
+{
+    <div class="alert alert-@(mensagemErro ? "danger" : "success") mt-2">
+        @mensagem
+    </div>
+}
+
+<button class="btn btn-primary mt-2" @onclick="CriarUsuarioAsync">Criar Usuário</button>
+
+@code {
+    [SupplyParameterFromQuery]
+    [Parameter]
+    public string? RedirecionarCasoSucesso { get; set; }
+
+    private UsuarioDTO usuario = new();
+    private string? Senha;
+
+    private bool mensagemErro = false;
+    private string? mensagem { get; set; }
+
+    private async Task CriarUsuarioAsync()
+    {
+        mensagemErro = false;
+
+        if (string.IsNullOrEmpty(usuario.Email))
+        {
+            mensagem = "É necessário informar o email.";
+            mensagemErro = true;
+            this.StateHasChanged();
+            return;
+        }
+
+        if (string.IsNullOrEmpty(usuario.Nome))
+        {
+            mensagem = "É necessário informar o nome.";
+            mensagemErro = true;
+            this.StateHasChanged();
+            return;
+        }
+
+        if (string.IsNullOrEmpty(Senha))
+        {
+            mensagem = "É necessário informar a senha.";
+            mensagemErro = true;
+            this.StateHasChanged();
+            return;
+        }
+
+        usuario.Apresentacao = usuario.Apresentacao.Replace("\n", "<br />");
+        Console.WriteLine($"Apresentação: '{usuario.Apresentacao}'");
+
+        try
+        {
+            var result = await ApiBackend.PostAsync("usuarios", usuario);
+
+            var trocarSenha = new TrocarSenhaDTO(usuario.Email, "", Senha);
+            await ApiBackend.PostAsync("usuarios/alterar-senha", trocarSenha);
+
+            mensagem = $"Usuário '{result.Nome}' criado com sucesso!";
+            StateHasChanged();
+
+            await SetTimeout(2000, () => Navigation.NavigateTo("/autenticacao/login"));
+        }
+        catch (Exception ex)
+        {
+            mensagem = ex.Message;
+            mensagemErro = true;
+            this.StateHasChanged();
+            return;
+        }
+    }
+
+    static async Task SetTimeout(int milliseconds, Action action)
+    {
+        await Task.Delay(milliseconds);
+        action();
+    }
+}

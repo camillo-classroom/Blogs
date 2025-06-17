@@ -37,6 +37,14 @@ public static class AdicionarEnpointsUsuariosExtensions
             .WithSummary("Retorna o usuário que possui o id informado")
             .RequireAuthorization();
 
+        usuarios.MapGet("/slug/{slug}", ObterUsuarioPorSlug)
+            .WithName("Obter usuário por slug")
+            .WithSummary("Retorna o usuário que possui o slug informado");
+
+        usuarios.MapGet("/email/{email}", ObterUsuarioPorEmail)
+            .WithName("Obter usuário por e-mail")
+            .WithSummary("Retorna o usuário que possui o e-mail informado");
+
         usuarios.MapPost("/login", Login)
             .WithName("Login")
             .WithSummary("Permite o login de usuário");
@@ -118,6 +126,51 @@ public static class AdicionarEnpointsUsuariosExtensions
         }
     }
 
+    private static async Task<IResult> ObterUsuarioPorEmail(string email, HttpContext context, IControleAcessoUseCase controleAcessoUseCase)
+    {
+        try
+        {
+            var resultado = await controleAcessoUseCase.ObterUsuarioPorEmail(email);
+            return resultado.Sucesso
+                ? TypedResults.Ok(resultado.Objeto)
+                : TypedResults.BadRequest(resultado.Erros);
+        }
+        catch (Exception ex)
+        {
+#if DEBUG
+            var metodo = MethodBase.GetCurrentMethod();
+
+            if (metodo != null)
+                Debug.WriteLine($"Exception in {metodo.Name}: {ex.Message}");
+#endif
+
+            return TypedResults.InternalServerError();
+        }
+    }
+    
+
+    private static async Task<IResult> ObterUsuarioPorSlug(string slug, HttpContext context, IControleAcessoUseCase controleAcessoUseCase)
+    {
+        try
+        {
+            var resultado = await controleAcessoUseCase.ObterUsuarioPorSlug(slug);
+            return resultado.Sucesso
+                ? TypedResults.Ok(resultado.Objeto)
+                : TypedResults.BadRequest(resultado.Erros);
+        }
+        catch (Exception ex)
+        {
+#if DEBUG
+            var metodo = MethodBase.GetCurrentMethod();
+
+            if (metodo != null)
+                Debug.WriteLine($"Exception in {metodo.Name}: {ex.Message}");
+#endif
+
+            return TypedResults.InternalServerError();
+        }
+    }
+    
     private static async Task<IResult> AlterarUsuario(long id, UsuarioDTO usuario, HttpContext context, IControleAcessoUseCase controleAcessoUseCase)
     {
         try
