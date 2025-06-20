@@ -31,10 +31,13 @@ builder.Services.AddAuthentication(x =>
 });
 
 builder.Services.AddAuthorizationBuilder();
-    //.AddPolicy("Admin", policy => policy.RequireRole("admin"))
-    //.AddPolicy("Gerente", policy => policy.RequireRole("gerente"))
-    //.AddPolicy("AdminOuGerente", policy => policy.RequireClaim(ClaimTypes.Role, "admin", "gerente"));
+//.AddPolicy("Admin", policy => policy.RequireRole("admin"))
+//.AddPolicy("Gerente", policy => policy.RequireRole("gerente"))
+//.AddPolicy("AdminOuGerente", policy => policy.RequireClaim(ClaimTypes.Role, "admin", "gerente"));
 
+//Adiciona o Distributed Memory Cache, que é um cache em memória que pode ser substituído no futuro por um
+//cache distribuído, como Redis ou SQL Server.
+builder.Services.AddDistributedMemoryCache();
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

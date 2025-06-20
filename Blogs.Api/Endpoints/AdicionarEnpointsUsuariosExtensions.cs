@@ -2,8 +2,11 @@ using Blogs.DTO.ControleAcessos;
 using Blogs.Model.ControleAcessos;
 using Blogs.UseCases;
 using Blogs.UseCases.ControleAcessos;
+using Blogs.UseCases.Postagens;
+using Microsoft.Extensions.Caching.Distributed;
 using System.Diagnostics;
 using System.Reflection;
+using System.Text;
 
 namespace Blogs.Api.Endpoints;
 
@@ -80,13 +83,21 @@ public static class AdicionarEnpointsUsuariosExtensions
     }
 
     
-    private static async Task<IResult> RetornarPrincipaisAutores(HttpContext context, IControleAcessoUseCase controleAcessoUseCase)
+    private static async Task<IResult> RetornarPrincipaisAutores(HttpContext context, IControleAcessoUseCase controleAcessoUseCase, IDistributedCache cache)
     {
+        string cacheKey = $"{nameof(RetornarPrincipaisAutores)}";
+
         try
         {
+            var objetosEmCache = await cache.GetAsync(cacheKey);
+
+            if (objetosEmCache != null)
+                return TypedResults.Content(Encoding.UTF8.GetString(objetosEmCache), "application/json");
+
             var resultado = await controleAcessoUseCase.ObterPrincipaisAutores();
+            
             return resultado.Sucesso
-                ? TypedResults.Ok(resultado.Objetos)
+                ? TypedResults.Ok(await cache.SetCacheAndReturnObjectAsync(cacheKey, resultado.Objetos))
                 : TypedResults.BadRequest(resultado.Erros);
         }
         catch (Exception ex)

@@ -1,9 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using System.Text;
+using System.Text.Json;
 using Blogs.DTO.Postagens;
 using Blogs.Infra.ControlesAcessos;
 using Blogs.UseCases.ControleAcessos;
 using Blogs.UseCases.Postagens;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace Blogs.Api.Endpoints
 {
@@ -41,15 +44,22 @@ namespace Blogs.Api.Endpoints
             postagens.AdicionarEndpointsPostagensReacoes();
         }
 
-        private static async Task<IResult> RetornarPostagens(long idAutor, long? idUltimaPostagem, IPostagemUseCase postagemUseCase)
+        private static async Task<IResult> RetornarPostagens(long idAutor, long? idUltimaPostagem, IPostagemUseCase postagemUseCase, IDistributedCache cache)
         {
+            string cacheKey = $"{nameof(RetornarPostagens)}/{idAutor}/{idUltimaPostagem}";
+            
             try
             {
+                var objetosEmCache = await cache.GetAsync(cacheKey);
+
+                if (objetosEmCache != null)
+                    return TypedResults.Content(Encoding.UTF8.GetString(objetosEmCache), "application/json");
+                
                 var resultado = await postagemUseCase.ConsultarPostagensAsync(idAutor, idUltimaPostagem);
 
-                return resultado.Sucesso
-                    ? TypedResults.Ok(resultado.Objetos)
-                    : TypedResults.BadRequest( resultado.Erros);
+                return resultado.Sucesso ?
+                    TypedResults.Ok(await cache.SetCacheAndReturnObjectAsync(cacheKey, resultado.Objetos)) :
+                    TypedResults.BadRequest(resultado.Erros);
             }
             catch (Exception ex)
             {
