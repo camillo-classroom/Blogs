@@ -3,7 +3,18 @@
 @using Blogs.DTO.Postagens
 @using Blogs.Front.Helpers
 @using System.Text.Json
+@using Ganss.Xss
 @inject IJSRuntime JS
+
+@{
+    var sanitizer = new HtmlSanitizer();
+    sanitizer.AllowedTags.Clear();
+    sanitizer.AllowedAtRules.Clear();
+    sanitizer.AllowedClasses.Clear();
+    sanitizer.AllowedCssProperties.Clear();
+    sanitizer.AllowedSchemes.Clear();
+    sanitizer.AllowedTags.Add("br");
+}
 
 @if (inserindo)
 {
@@ -44,7 +55,7 @@ else
                     <h4>@postagem.Titulo</h4>
                     <strong>@postagem.DataHora.ToString("dd/MM/yyyy HH:mm:ss")</strong>
                     <div>
-                        @((MarkupString)postagem.Conteudo)
+                        @((MarkupString)sanitizer.Sanitize(postagem.Conteudo))
                     </div>
                 </div>
 

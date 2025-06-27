@@ -2,6 +2,17 @@
 @using Blogs.DTO.ControleAcessos
 @using Blogs.DTO.Postagens
 @using Blogs.Front.Helpers
+@using Ganss.Xss
+
+@{
+    var sanitizer = new HtmlSanitizer();
+    sanitizer.AllowedTags.Clear();
+    sanitizer.AllowedAtRules.Clear();
+    sanitizer.AllowedClasses.Clear();
+    sanitizer.AllowedCssProperties.Clear();
+    sanitizer.AllowedSchemes.Clear();
+    sanitizer.AllowedTags.Add("br");
+}
 
 @if (usuario == null)
 {
@@ -30,7 +41,7 @@ else
                     <h4>@postagem.Titulo</h4>
                     <strong>@postagem.DataHora.ToString("dd/MM/yyyy HH:mm:ss")</strong>
                     <div>
-                        @((MarkupString)postagem.Conteudo)
+                        @((MarkupString)sanitizer.Sanitize(postagem.Conteudo))
                     </div>
                 </div>
 

@@ -6,7 +6,9 @@ using Blogs.DTO.Postagens;
 using Blogs.Infra.ControlesAcessos;
 using Blogs.UseCases.ControleAcessos;
 using Blogs.UseCases.Postagens;
+using Ganss.Xss;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Win32.SafeHandles;
 
 namespace Blogs.Api.Endpoints
 {
@@ -78,6 +80,8 @@ namespace Blogs.Api.Endpoints
         {
             try
             {
+                obj.Conteudo = GetSanitizer().Sanitize(obj.Conteudo);
+
                 obj.DataHora = DateTime.Now;
 
                 postagemUseCase.IdentificarAcesso(context.User.GetId());
@@ -109,6 +113,8 @@ namespace Blogs.Api.Endpoints
 
                 if (id != obj.Id)
                     return TypedResults.BadRequest("O id não confere.");
+
+                obj.Conteudo = GetSanitizer().Sanitize(obj.Conteudo);
 
                 var resultado = await postagemUseCase.AlterarPostagem(obj);
                 return resultado.Sucesso
@@ -150,6 +156,24 @@ namespace Blogs.Api.Endpoints
 
                 return TypedResults.InternalServerError();
             }
+        }
+
+        private static HtmlSanitizer sanitizer;
+
+        private static HtmlSanitizer GetSanitizer()
+        {
+            if (sanitizer == null)
+            {
+                sanitizer = new HtmlSanitizer();
+                sanitizer.AllowedTags.Clear();
+                sanitizer.AllowedAtRules.Clear();
+                sanitizer.AllowedClasses.Clear();
+                sanitizer.AllowedCssProperties.Clear();
+                sanitizer.AllowedSchemes.Clear();
+                sanitizer.AllowedTags.Add("br");
+            }
+
+            return sanitizer;
         }
     }
 }
